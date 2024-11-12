@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Чат</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='chat1.css') }}">
+    <style>
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-window {
+            max-height: 700px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .messages {
+            list-style: none;
+            padding: 0;
+        }
+
+        .message {
+            margin-bottom: 40px;
+        }
+
+        .message.sent {
+            text-align: right;
+        }
+
+        .message.received {
+            text-align: left;
+        }
+
+        .message-form {
+            display: flex;
+            flex-direction: column; /* Изменено на столбец для правильного порядка элементов */
+            margin-bottom: 10px;
+        }
+
+        .message-form textarea {
+            flex: 1;
+            margin-top: 10px; /* Отступ между полем сообщения и кнопками */
+            height: 30px;
+            resize: none;
+        }
+
+        .form {
+            background-color: #512da8;
+            color: white;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        
+        .navigation {
+            text-align: center;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #512da8;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .button:hover {
+            background-color: #6f5d9b;
+        }
+
+        .input-field {
+            margin-bottom: 10px; /* Добавляем отступ между полями */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Чат с пользователем {{ recipient_name }}</h1>
+
+        <div class="chat-window" id="chatWindow">
+            <ul class="messages">
+                {% for message in messages %}
+                    <li class="message {% if message.sender_id == current_user.id %}sent{% else %}received{% endif %}">
+                        <strong>{{ 'Вы' if message.sender_id == current_user.id else 'Пользователь ' ~ message.sender_id }}</strong>:
+                        {{ message.content }}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <form method="POST" class="message-form">
+            <input type="password" id="secretKey" class="input-field" placeholder="Введите секретный ключ" required> <!-- Поле ключа перемещено выше -->
+            <textarea id="messageContent" name="content" placeholder="Введите сообщение..." required></textarea>
+            <button type="submit" class="form">Отправить</button>
+            <button type="button" id="encryptButton" class="button">Шифровать</button>
+            <button type="button" id="decryptButton" class="button">Дешифровать</button>
+        </form>
+
+        <!-- Добавляем кнопку назад, которая ведет на страницу контактов -->
+        <div class="navigation">
+            <a href="{{ url_for('contacts') }}" class="back-link">Назад к контактам</a>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.js"></script>
+    <script>
+        // Функция шифрования с помощью AES
+        function aesEncrypt(text, key) {
+            return CryptoJS.AES.encrypt(text, key).toString();
+        }
+
+        // Функция дешифрования с помощью AES
+        function aesDecrypt(ciphertext, key) {
+            const bytes = CryptoJS.AES.decrypt(ciphertext, key);
+            return bytes.toString(CryptoJS.enc.Utf8);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Обработчики событий для кнопок
+            document.getElementById('encryptButton').addEventListener('click', function() {
+                const messageField = document.getElementById('messageContent');
+                const secretKey = document.getElementById('secretKey').value;
+                const originalText = messageField.value;
+
+                if (!secretKey) {
+                    alert("Пожалуйста, введите секретный ключ!");
+                    return;
+                }
+
+                const encryptedText = aesEncrypt(originalText, secretKey);
+                messageField.value = encryptedText; // Устанавливаем зашифрованный текст
+            });
+
+            document.getElementById('decryptButton').addEventListener('click', function() {
+                const messageField = document.getElementById('messageContent');
+                const secretKey = document.getElementById('secretKey').value;
+                const encryptedText = messageField.value;
+
+                if (!secretKey) {
+                    alert("Пожалуйста, введите секретный ключ!");
+                    return;
+                }
+
+                try {
+                    const decryptedText = aesDecrypt(encryptedText, secretKey);
+                    if (decryptedText) {
+                        messageField.value = decryptedText; // Устанавливаем расшифрованный текст
+                    } else {
+                        alert("Неверный секретный ключ или некорректный шифр.");
+                    }
+                } catch (e) {
+                    alert("Ошибка дешифрования. Проверьте ключ и текст.");
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мессенджер</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='chat.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Добро пожаловать, {{ username }}!</h1>
+            <a href="{{ url_for('logout') }}" class="logout">Выйти</a>
+        </header>
+        
+        <div class="contacts-section">
+            <h2>Контакты</h2>
+            <a href="{{ url_for('contacts') }}" class="button">Список контактов</a>
+        </div>
+    </div>
+</body>
+</html>

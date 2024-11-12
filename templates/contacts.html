@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Список контактов</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='contacts.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap">
+</head>
+<body>
+    <div class="container">
+        <h1>Список контактов</h1>
+        
+        <form method="POST" class="contacts-form">
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                {{ form.username.label }}
+                {{ form.username(size=32) }}
+            </div>
+            {{ form.submit(class="button") }}
+        </form>
+
+        <ul class="contact-list">
+            {% for contact in contacts %}
+                <li class="contact-item">
+                    <span>{{ contact.username }}</span>
+                    <a href="{{ url_for('chat', recipient_id=contact.id) }}" class="chat-link">Перейти в чат</a>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <a href="{{ url_for('index') }}" class="back-link">Назад</a>
+    </div>
+</body>
+</html>
